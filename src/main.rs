@@ -1,5 +1,5 @@
 use druid::{AppLauncher, Color, Data, Lens, Size, WindowConfig, WindowDesc, WindowLevel, WidgetExt};
-use druid::widget::{Button, Flex, Label, Widget};
+use druid::widget::{Button, Flex, Label, Widget, CrossAxisAlignment};
 
 const PANE_HEIGHT: f64 = 400.0;
 
@@ -12,7 +12,7 @@ struct AppState {
 fn main() {
     let main_window = WindowDesc::new(build_root_widget())
         .title("Pane Demo Main Win")
-        .window_size((800.0, PANE_HEIGHT + 150.0))
+        .window_size((800.0, PANE_HEIGHT + 90.0))
         .transparent(true);
 
     let state = AppState {};
@@ -31,7 +31,7 @@ fn build_root_widget() -> impl Widget<AppState> {
                 WindowConfig::default()
                     .show_titlebar(true)
                     .window_size(Size::new(250.0, PANE_HEIGHT))
-                    .set_level(WindowLevel::Modal(ctx.window().clone())),
+                    .set_level(WindowLevel::Tooltip(ctx.window().clone())),
                 build_pane_widget(),
                 data.clone(),
                 env.clone(),
@@ -48,12 +48,17 @@ fn build_root_widget() -> impl Widget<AppState> {
             ctx.window().show_titlebar(false);
         }
     );
-    Flex::column()
+    Flex::row()
         .with_child(label)
+        .with_default_spacer()
         .with_child(add_pane_button)
+        .with_default_spacer()
         .with_child(show_titlebar)
+        .with_default_spacer()
         .with_child(hide_titlebar)
+        .cross_axis_alignment(CrossAxisAlignment::Start)
         .background(Color::rgba(30.0, 30.0, 30.0, 0.2))
+        .expand()
 }
 
 fn build_pane_widget() -> impl Widget<AppState> {
