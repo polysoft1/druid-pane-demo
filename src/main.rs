@@ -1,5 +1,6 @@
-use druid::{AppLauncher, Color, Data, Lens, Size, WindowConfig, WindowDesc, WindowLevel, WidgetExt};
+use druid::{AppLauncher, Color, Data, Lens, Point, Size, WindowConfig, WindowDesc, WindowLevel, WidgetExt};
 use druid::widget::{Button, Flex, Label, Widget, CrossAxisAlignment};
+use druid_shell::WindowHandle;
 
 const PANE_HEIGHT: f64 = 400.0;
 
@@ -48,6 +49,10 @@ fn build_root_widget() -> impl Widget<AppState> {
             ctx.window().show_titlebar(false);
         }
     );
+    let hide_dock = Button::new("Hide Dock")
+        .on_click(|_ctx, _data: &mut AppState, _env| {
+        }
+    );
     Flex::row()
         .with_child(label)
         .with_default_spacer()
@@ -56,6 +61,8 @@ fn build_root_widget() -> impl Widget<AppState> {
         .with_child(show_titlebar)
         .with_default_spacer()
         .with_child(hide_titlebar)
+        .with_default_spacer()
+        .with_child(hide_dock)
         .cross_axis_alignment(CrossAxisAlignment::Start)
         .background(Color::rgba(30.0, 30.0, 30.0, 0.2))
         .expand()
@@ -63,6 +70,12 @@ fn build_root_widget() -> impl Widget<AppState> {
 
 fn build_pane_widget() -> impl Widget<AppState> {
     let label = Label::new("This is a pane");
-    let col = Flex::column().with_child(label);
-    col
+    let position_within_dock = Button::new("Position in Dock")
+        .on_click(|ctx, _data: &mut AppState, _env| {
+            ctx.window().set_position_within_parent(Point::new(0.0, 0.0));
+        }
+    );
+    Flex::column()
+        .with_child(label)
+        .with_child(position_within_dock)
 }
