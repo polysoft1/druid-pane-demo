@@ -1,11 +1,11 @@
-use druid::{AppLauncher, Color, Data, Lens, Point, Size, WindowConfig, WindowDesc, WindowLevel, WidgetExt};
+use druid::{AppLauncher, Color, Data, Lens, Rect, Region, Size, WindowConfig, WindowDesc, WindowLevel, WidgetExt};
 use druid::widget::{Button, Flex, Label, Widget, CrossAxisAlignment};
-use druid_shell::WindowHandle;
 
 const PANE_HEIGHT: f64 = 400.0;
 
 #[derive(Clone, Data, Lens)]
 struct AppState {
+    show_dock: bool,
 
 }
 
@@ -16,7 +16,10 @@ fn main() {
         .window_size((800.0, PANE_HEIGHT + 90.0))
         .transparent(true);
 
-    let state = AppState {};
+    let state = AppState {
+        show_dock: true,
+
+    };
 
     AppLauncher::with_window(main_window)
         .log_to_console()
@@ -49,8 +52,11 @@ fn build_root_widget() -> impl Widget<AppState> {
             ctx.window().show_titlebar(false);
         }
     );
-    let hide_dock = Button::new("Hide Dock")
-        .on_click(|_ctx, _data: &mut AppState, _env| {
+    let hide_dock = Button::new("Set Region")
+        .on_click(|ctx, _data: &mut AppState, _env| {
+            let mut region = Region::EMPTY;
+            region.add_rect(Rect::new(0.0, 0.0, 800.0, 50.0));
+            ctx.window().set_interactable_area(&region);
         }
     );
     Flex::row()
@@ -64,15 +70,15 @@ fn build_root_widget() -> impl Widget<AppState> {
         .with_default_spacer()
         .with_child(hide_dock)
         .cross_axis_alignment(CrossAxisAlignment::Start)
-        .background(Color::rgba(30.0, 30.0, 30.0, 0.2))
         .expand()
+        .background(Color::rgba(5.0, 5.0, 5.0, 0.25))
 }
 
 fn build_pane_widget() -> impl Widget<AppState> {
     let label = Label::new("This is a pane");
-    let position_within_dock = Button::new("Position in Dock")
-        .on_click(|ctx, _data: &mut AppState, _env| {
-            ctx.window().set_position_within_parent(Point::new(0.0, 0.0));
+    let position_within_dock = Button::new("TODO")
+        .on_click(|_ctx, _data: &mut AppState, _env| {
+            //ctx.window().set_position_within_parent(Point::new(0.0, 0.0));
         }
     );
     Flex::column()
