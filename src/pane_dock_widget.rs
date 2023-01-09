@@ -1,4 +1,4 @@
-use druid::widget::{Widget, Flex, Label, Button, Container};
+use druid::widget::{Widget, Flex, Label, Button, Container, LineBreaking};
 use druid::widget::prelude::*;
 use druid::{WidgetPod, WidgetExt, Point, Color, Region};
 use crate::{AppState, PaneData, pane_widget::PaneWidget};
@@ -21,13 +21,13 @@ impl PaneDockWidget {
         let info_label = Label::new("Move and resize the pane dock, then hide the dock.");
 
         let toggle_dock_button = Button::new("Toggle Dock")
-        .on_click(|ctx, data: &mut bool, _: &Env| {
-            *data = !*data;
-            ctx.window().show_titlebar(*data);
-            ctx.request_layout();
-        })
-        .lens(AppState::show_dock)
-        .boxed();
+            .on_click(|ctx, data: &mut bool, _: &Env| {
+                *data = !*data;
+                ctx.window().show_titlebar(*data);
+                ctx.request_layout();
+            })
+            .lens(AppState::show_dock)
+            .boxed();
 
         let add_pane_button = Button::new("Add Pane")
         .on_click(|ctx, data: &mut AppState, _: &Env| {
@@ -35,15 +35,34 @@ impl PaneDockWidget {
             ctx.children_changed();
         });
 
+        let mut dock_items = Flex::column()
+            .with_child(info_label);
+        if cfg!(target_os = "linux") {
+            // Can't manually set this on Linux, but it is more often than not an option on the titlebar
+            let mut always_on_top_msg: Label<AppState> = Label::new("Most desktop environments allow you to set this window always on top by right clicking on the titlebar and selecting \"Always on top\"");
+            always_on_top_msg.set_line_break_mode(LineBreaking::WordWrap);
+            dock_items.add_default_spacer();
+            dock_items.add_child(always_on_top_msg);
+        }
+        if cfg!(target_os = "macos") || cfg!(target_os = "windows") {
+            let always_on_top_button = Button::new("Toggle Always On Top")
+                .on_click(|ctx, data: &mut AppState, _: &Env| {
+                    data.always_on_top = !data.always_on_top;
+                    println!("Setting always on top to: {}", data.always_on_top);
+                    ctx.window().set_always_on_top(data.always_on_top);
+                });
+            dock_items.add_child(always_on_top_button);
+        }
+
+        let persistent_items = Flex::column()
+            .with_child(toggle_dock_button)
+            .with_child(add_pane_button)
+            .padding(3.0)
+            .background(Color::rgba(255.0, 255.0, 255.0, 0.1));
+
         Self {
-            dock_items: WidgetPod::new(Flex::column()
-                .with_child(info_label)),
-            persistent_items: WidgetPod::new(Flex::column()
-                .with_child(toggle_dock_button)
-                .with_child(add_pane_button)
-                .padding(3.0)
-                .background(Color::rgba(255.0, 255.0, 255.0, 0.1))
-            ),
+            dock_items: WidgetPod::new(dock_items),
+            persistent_items: WidgetPod::new(persistent_items),
             panes: vec![],
         }
     }
@@ -132,16 +151,19 @@ impl Widget<AppState> for PaneDockWidget {
     fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &AppState, env: &druid::Env) -> druid::Size {
         let mut iteractable_area = Region::EMPTY;
         let inner_item_bc = BoxConstraints::new(Size::new(0.0, 0.0), bc.max());
+        
+        // Position to right
+        let persistent_items_size = self.persistent_items.layout(ctx, &inner_item_bc, data, env);
+        self.persistent_items.set_origin(ctx, Point::new(bc.max().width - persistent_items_size.width, 0.0));
+        iteractable_area.add_rect(self.persistent_items.layout_rect());
+
         if data.show_dock {
-            let _dock_items_layout = self.dock_items.layout(ctx, &inner_item_bc, data, env);
+            let dock_item_bc = BoxConstraints::new(inner_item_bc.min(),
+                Size::new(inner_item_bc.max().width - persistent_items_size.width, inner_item_bc.max().height));
+            let _dock_items_layout = self.dock_items.layout(ctx, &dock_item_bc, data, env);
             self.dock_items.set_origin(ctx, Point::new(0.0, 0.0));
             iteractable_area.add_rect(bc.max().to_rect().inflate(40.0, 80.0));
         }
-        
-        // Position to right
-        let persistent_items_layout = self.persistent_items.layout(ctx, &inner_item_bc, data, env);
-        self.persistent_items.set_origin(ctx, Point::new(bc.max().width - persistent_items_layout.width, 0.0));
-        iteractable_area.add_rect(self.persistent_items.layout_rect());
 
         let panes_iter = self.panes.iter_mut();
         let data_iter = data.panes.iter();
@@ -159,7 +181,11 @@ impl Widget<AppState> for PaneDockWidget {
             // Make it interactable
             iteractable_area.add_rect(pane_widget.layout_rect());
         };
-        ctx.window().set_interactable_area(&iteractable_area);
+        if data.show_dock {
+            ctx.window().set_interactable_area(None);
+        } else {
+            ctx.window().set_interactable_area(Some(iteractable_area));
+        }
 
         bc.max()
     }

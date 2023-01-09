@@ -16,6 +16,7 @@ struct PaneData {
 #[derive(Clone, Data, Lens)]
 struct AppState {
     show_dock: bool,
+    always_on_top: bool,
     panes: im::Vector<PaneData>
 }
 
@@ -33,6 +34,7 @@ fn main() {
 
     let state = AppState {
         show_dock: true,
+        always_on_top: false,
         panes: im::vector![
             PaneData { }
         ]
