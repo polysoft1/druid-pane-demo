@@ -182,9 +182,9 @@ impl Widget<AppState> for PaneDockWidget {
             iteractable_area.add_rect(pane_widget.layout_rect());
         };
         if data.show_dock {
-            ctx.window().set_interactable_area(None);
+            ctx.window().set_input_region(None);
         } else {
-            ctx.window().set_interactable_area(Some(iteractable_area));
+            ctx.window().set_input_region(Some(iteractable_area));
         }
 
         bc.max()
