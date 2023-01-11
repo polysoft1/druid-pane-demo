@@ -39,20 +39,18 @@ impl PaneDockWidget {
             .with_child(info_label);
         if cfg!(target_os = "linux") {
             // Can't manually set this on Linux, but it is more often than not an option on the titlebar
-            let mut always_on_top_msg: Label<AppState> = Label::new("Most desktop environments allow you to set this window always on top by right clicking on the titlebar and selecting \"Always on top\"");
+            let mut always_on_top_msg: Label<AppState> = Label::new("If the always on top button does nothing, most desktop environments allow you to set this window always on top by right clicking on the titlebar and selecting \"Always on top\"");
             always_on_top_msg.set_line_break_mode(LineBreaking::WordWrap);
             dock_items.add_default_spacer();
             dock_items.add_child(always_on_top_msg);
         }
-        if cfg!(target_os = "macos") || cfg!(target_os = "windows") {
-            let always_on_top_button = Button::new("Toggle Always On Top")
-                .on_click(|ctx, data: &mut AppState, _: &Env| {
-                    data.always_on_top = !data.always_on_top;
-                    println!("Setting always on top to: {}", data.always_on_top);
-                    ctx.window().set_always_on_top(data.always_on_top);
-                });
-            dock_items.add_child(always_on_top_button);
-        }
+        let always_on_top_button = Button::new("Toggle Always On Top")
+            .on_click(|ctx, data: &mut AppState, _: &Env| {
+                data.always_on_top = !data.always_on_top;
+                println!("Setting always on top to: {}", data.always_on_top);
+                ctx.window().set_always_on_top(data.always_on_top);
+            });
+        dock_items.add_child(always_on_top_button);
 
         let persistent_items = Flex::column()
             .with_child(toggle_dock_button)
