@@ -8,6 +8,8 @@ pub struct PaneDockWidget {
     persistent_items: WidgetPod<AppState, Container<AppState>>,
     /// Order should match order in data, not x position order.
     panes: Vec<(PaneLocationData, WidgetPod<PaneData, PaneWidget>)>,
+    // For dragging the dock
+    init_pos: Option<Point>,
 }
 struct PaneLocationData {
     x_pos: f64, // Relative to the bound side. Default dist from right.
@@ -35,7 +37,7 @@ impl PaneDockWidget {
             ctx.children_changed();
         });
 
-        let mut dock_items = Flex::column()
+        let mut dock_items = Flex::row()
             .with_child(info_label);
         if cfg!(target_os = "linux") {
             // Can't manually set this on Linux, but it is more often than not an option on the titlebar
@@ -50,6 +52,11 @@ impl PaneDockWidget {
                 println!("Setting always on top to: {}", data.always_on_top);
                 ctx.window().set_always_on_top(data.always_on_top);
             });
+        let close_window_button = Button::new("Close Window")
+            .on_click(|ctx, _: &mut AppState, _| {
+                ctx.window().close();
+            });
+        dock_items.add_child(close_window_button);
         dock_items.add_child(always_on_top_button);
 
         let persistent_items = Flex::column()
@@ -62,6 +69,7 @@ impl PaneDockWidget {
             dock_items: WidgetPod::new(dock_items),
             persistent_items: WidgetPod::new(persistent_items),
             panes: vec![],
+            init_pos: None,
         }
     }
 
@@ -100,6 +108,39 @@ impl PaneDockWidget {
         let new_widget = WidgetPod::new(PaneWidget::new());
         self.panes.push((new_loc_data, new_widget));
     }
+
+    fn handle_dragging(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event) {
+        match event {
+            Event::MouseDown(me) if me.buttons.has_left() && !self.get_input_area().contains(me.window_pos) => {
+                ctx.set_active(true);
+                self.init_pos = Some(me.window_pos)
+            }
+            Event::MouseMove(me) if ctx.is_active() && me.buttons.has_left() => {
+                if let Some(init_pos) = self.init_pos {
+                    let within_window_change = me.window_pos.to_vec2() - init_pos.to_vec2();
+                    let old_pos = ctx.window().get_position();
+                    let new_pos = old_pos + within_window_change;
+
+                    ctx.window().set_position(new_pos)
+                }
+            }
+            Event::MouseUp(_me) if ctx.is_active() => {
+                self.init_pos = None;
+                ctx.set_active(false)
+            }
+            _ => (),
+        }
+    }
+
+    fn get_input_area(&self) -> Region {
+        let mut interactable_area = Region::EMPTY;
+        interactable_area.add_rect(self.persistent_items.layout_rect());
+        let panes_itr = self.panes.iter();
+        for (_, pane_widget) in panes_itr {
+            interactable_area.add_rect(pane_widget.layout_rect());
+        };
+        interactable_area
+    }
 }
 
 impl Widget<AppState> for PaneDockWidget {
@@ -112,6 +153,8 @@ impl Widget<AppState> for PaneDockWidget {
         for ((_pane_location_data,pane_widget), pane_data) in panes_iter.zip(data_iter) {
             pane_widget.event(ctx, event, pane_data, env);
         };
+
+        self.handle_dragging(ctx, event);
     }
 
     fn lifecycle(&mut self, ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &AppState, env: &druid::Env) {
@@ -140,27 +183,24 @@ impl Widget<AppState> for PaneDockWidget {
             pane_widget.update(ctx, pane_data, env);
         };
 
-        if self.update_pane_widgets(data) || old_data.show_dock != data.show_dock {
+        if self.update_pane_widgets(data, Some(old_data)) || old_data.show_dock != data.show_dock {
             ctx.children_changed();
             ctx.request_layout();
         }
     }
 
     fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &AppState, env: &druid::Env) -> druid::Size {
-        let mut iteractable_area = Region::EMPTY;
         let inner_item_bc = BoxConstraints::new(Size::new(0.0, 0.0), bc.max());
         
         // Position to right
         let persistent_items_size = self.persistent_items.layout(ctx, &inner_item_bc, data, env);
         self.persistent_items.set_origin(ctx, Point::new(bc.max().width - persistent_items_size.width, 0.0));
-        iteractable_area.add_rect(self.persistent_items.layout_rect());
 
         if data.show_dock {
             let dock_item_bc = BoxConstraints::new(inner_item_bc.min(),
                 Size::new(inner_item_bc.max().width - persistent_items_size.width, inner_item_bc.max().height));
             let _dock_items_layout = self.dock_items.layout(ctx, &dock_item_bc, data, env);
             self.dock_items.set_origin(ctx, Point::new(0.0, 0.0));
-            iteractable_area.add_rect(bc.max().to_rect().inflate(40.0, 80.0));
         }
 
         let panes_iter = self.panes.iter_mut();
@@ -176,13 +216,11 @@ impl Widget<AppState> for PaneDockWidget {
                 bc.max().width - pane_location_data.x_pos - pane_location_data.width,
                 bc.max().height - pane_size.height
             ));
-            // Make it interactable
-            iteractable_area.add_rect(pane_widget.layout_rect());
         };
         if data.show_dock {
             ctx.window().set_input_region(None);
         } else {
-            ctx.window().set_input_region(Some(iteractable_area));
+            ctx.window().set_input_region(Some(self.get_input_area()));
         }
 
         bc.max()
