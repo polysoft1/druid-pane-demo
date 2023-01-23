@@ -1,19 +1,18 @@
-use druid::widget::{Widget, Flex, Label, Container};
-use druid::{WidgetPod, WidgetExt, Color, Point};
+use druid::widget::{Widget, Flex, Label, SizedBox};
+use druid::{WidgetPod, WidgetExt, Point};
 use crate::PaneData;
 
 pub struct PaneWidget {
-    contents: WidgetPod<PaneData, Container<PaneData>>,
+    contents: WidgetPod<PaneData, SizedBox<PaneData>>,
 }
 
 impl PaneWidget {
     pub fn new() -> Self {
-        let placeholder_label = Label::new("Pane");
-        PaneWidget { contents: WidgetPod::new(
+        let placeholder_label = Label::new(|data: &PaneData, _: &_| format!("Pane {} content", data.id));
+        Self { contents: WidgetPod::new(
                 Flex::column()
                     .with_child(placeholder_label)
                     .expand()
-                    .background(Color::GRAY)
             )
         }
     }
