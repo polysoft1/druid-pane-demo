@@ -338,7 +338,6 @@ impl Widget<AppState> for PaneDockWidget {
     }
 
     fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &AppState, env: &druid::Env) -> druid::Size {
-        println!("Updating layout");
         let inner_item_bc = BoxConstraints::new(Size::new(0.0, 0.0), bc.max());
         
         // Position to right
