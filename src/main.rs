@@ -48,10 +48,14 @@ fn main() {
         },
         pane_dock_widget::PaneDockWidget::new()
     );
-    let main_window = WindowDesc::new(root)
+    let mut main_window = WindowDesc::new(root)
         .title("Pane Demo Main Win")
         .window_size((1024.0, DEFAULT_PANE_HEIGHT + HEADER_HEIGHT + 100.0))
-        .transparent(true);
+        .transparent(true)
+        .show_titlebar(false);
+    if cfg!(target_os = "macos") {
+        main_window = main_window.show_titlebar(false);
+    }
 
     let state = AppState {
         show_dock: true,

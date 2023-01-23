@@ -1,4 +1,4 @@
-use druid::widget::{Widget, Flex, Label, Button, Container, LineBreaking};
+use druid::widget::{Widget, Flex, Label, Button, Container, LineBreaking, ControllerHost, Controller};
 use druid::widget::prelude::*;
 use druid::{WidgetPod, WidgetExt, Point, Color, Region};
 use crate::HEADER_HEIGHT;
@@ -25,9 +25,19 @@ impl PaneDockWidget {
         let info_label = Label::new("Move and resize the pane dock, then hide the dock.");
 
         let toggle_dock_button = Button::new("Toggle Dock")
-            .on_click(|ctx, data: &mut bool, _: &Env| {
-                *data = !*data;
-                ctx.window().show_titlebar(*data);
+            .on_click(|ctx, is_shown: &mut bool, _: &Env| {
+                *is_shown = !*is_shown;
+                ctx.window().show_titlebar(*is_shown);
+                // Resize to refresh background.
+                let old_size = ctx.window().get_size();
+                let new_size = if *is_shown {
+                    // Shrink in height by 1 px
+                    Size::new(old_size.width, old_size.height - 1.0)
+                } else {
+                    // Grow in height by 1 px
+                    Size::new(old_size.width, old_size.height + 1.0)
+                };
+                ctx.window().set_size(new_size);
                 ctx.request_layout();
             })
             .lens(AppState::show_dock)
