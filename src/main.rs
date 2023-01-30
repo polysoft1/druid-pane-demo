@@ -8,7 +8,7 @@ mod pane_widget;
 
 const DEFAULT_PANE_HEIGHT: f64 = 480.0;
 const DEFAULT_PANE_WIDTH: f64 = 300.0;
-const PANE_SPACING: f64 = 10.0;
+const PANE_SPACING: f64 = 8.0;
 const HEADER_HEIGHT: f64 = 25.0;
 const DOCK_BACKGROUND_COLOR: Color = Color::rgba8(0, 0, 0, 200);
 const PANE_BACKGROUND_COLOR: Color = Color::rgb8(70, 70, 70);

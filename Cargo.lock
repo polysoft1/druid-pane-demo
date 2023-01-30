@@ -224,7 +224,7 @@ dependencies = [
 
 [[package]]
 name = "druid"
-version = "0.7.0"
+version = "0.8.2"
 dependencies = [
  "console_error_panic_hook",
  "druid-derive",
@@ -245,7 +245,7 @@ dependencies = [
 
 [[package]]
 name = "druid-derive"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -262,7 +262,7 @@ dependencies = [
 
 [[package]]
 name = "druid-shell"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "bitflags",
@@ -856,9 +856,9 @@ dependencies = [
 
 [[package]]
 name = "piet"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddd2a0027c9ea84b51f42ea3148864e6fc58970ad927e78390d5f9cf7cfa2c78"
+checksum = "d674a688c14a7ef6b027dabac0663539a9b0f2c8b8e43e217f951d1907fc13b5"
 dependencies = [
  "kurbo",
  "unic-bidi",
@@ -866,9 +866,9 @@ dependencies = [
 
 [[package]]
 name = "piet-cairo"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b98e21ec69eefb09d34e34050beb700749547dfc5da7a6cff27089dd59af1b3"
+checksum = "26f1269e05f7188ad973cfd0a2579d027d764c7c50be1c559961f88a12d3905d"
 dependencies = [
  "cairo-rs",
  "pango",
@@ -880,9 +880,9 @@ dependencies = [
 
 [[package]]
 name = "piet-common"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b7285cc595907be29db4d7f3fb331ae273250365cebf536a4a7b1dafc62978e"
+checksum = "2a1acb7da4b572d6167516c8fd4bb1c7d3711014e8c70fcbde5557d971e23f8d"
 dependencies = [
  "cairo-rs",
  "cairo-sys-rs",
@@ -899,9 +899,9 @@ dependencies = [
 
 [[package]]
 name = "piet-coregraphics"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32553fa0566ed2f23dadec1078a1e6a5930672f350db54d4267e9358f578ab4f"
+checksum = "f0da97c0a90ad73a9b3f9df533a241ebc547c3795adfcd9a428b2b240ab70730"
 dependencies = [
  "associative-cache",
  "core-foundation",
@@ -914,9 +914,9 @@ dependencies = [
 
 [[package]]
 name = "piet-direct2d"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d65edc9fa5d1710daa2e55e9cc7b65e65794304ffa870a565fb7128f3110ac5"
+checksum = "f643ef07cd883de91c634bc5fc9f8110d0c23cd51f63383920ab1e97a0d588ab"
 dependencies = [
  "associative-cache",
  "dwrote",
@@ -928,9 +928,9 @@ dependencies = [
 
 [[package]]
 name = "piet-web"
-version = "0.6.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "303452b9813560d4e4ea37b5792b18578b12f1e47111f1aea1a4cb9392f6fa95"
+checksum = "38c16ba539f6e3c0b051d6e5ff709bfb3f84e0755142988cb1824a4a85f3a2b4"
 dependencies = [
  "js-sys",
  "piet",
@@ -995,9 +995,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.49"
+version = "1.0.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57a8eca9f9c4ffde41714334dee777596264c7825420f521abc92b5b5deb63a5"
+checksum = "6ef7d57beacfaf2d8aee5937dab7b7f28de3cb8b1828479bb5de2a7106f2bae2"
 dependencies = [
  "unicode-ident",
 ]
