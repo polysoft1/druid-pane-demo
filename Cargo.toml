@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-druid = { path = "../druid/druid", features=["im"]}
+druid =  { git = "https://github.com/jaredoconnell/druid.git", rev="717cf613f5af9ff7368d3b75b30bc4bc1e260255", features=["im"]}
 druid-shell = { git = "https://github.com/jaredoconnell/druid.git", rev="717cf613f5af9ff7368d3b75b30bc4bc1e260255" }
