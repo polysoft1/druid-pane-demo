@@ -443,12 +443,15 @@ impl PaneDockWidget {
                 self.total_drag_dist = 0.0;
                 ctx.set_active(false)
             }
-            Event::AnimFrame(_time_since_last_frame) => {
+            Event::AnimFrame(time_since_last_frame) => {
                 // TODO: use time_since_last_frame to adjust to different frame rates
                 // Check if any panes need animating. If they do, request another AnimFrame
+                let expected_time = 16000000.0;
+                let time_relative_to_reference = *time_since_last_frame as f64 / expected_time;
+                let anim_speed_correction = time_relative_to_reference.max(0.25).min(1.25);
                 let mut animation_needed = false;
                 let mut layout_needed = false;
-                let min_animation_speed = 30.0;
+                let min_animation_speed = 20.0 * anim_speed_correction;
                 for i in 0..self.panes.len() {
                     if !self.dragging_pane.is_none() && self.dragging_pane.unwrap() == i {
                         // Skip dragged pane until it's no longer being dragged
@@ -462,7 +465,7 @@ impl PaneDockWidget {
                         } else {
                             let mut move_amount_magnitude = min_animation_speed;
                             
-                            move_amount_magnitude += location_diff.abs() * 0.15;
+                            move_amount_magnitude += location_diff.abs() * 0.15 * anim_speed_correction;
                             if location_diff.is_sign_negative() {
                                 move_amount_magnitude *= -1.0;
                             }
