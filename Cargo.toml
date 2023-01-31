@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 druid = { path = "../druid/druid", features=["im"]}
-druid-shell = { path = "../druid/druid-shell"}
+druid-shell = { git = "https://github.com/jaredoconnell/druid.git", rev="717cf613f5af9ff7368d3b75b30bc4bc1e260255" }
