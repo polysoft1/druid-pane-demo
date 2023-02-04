@@ -1,6 +1,6 @@
 use druid::widget::{Widget, Flex, Label, Button, Container, LineBreaking};
 use druid::widget::prelude::*;
-use druid::{WidgetPod, WidgetExt, Point, Color, Region};
+use druid::{WidgetPod, WidgetExt, Point, Color, Region, Rect};
 use crate::HEADER_HEIGHT;
 use crate::{AppState, PaneData, pane_widget::PaneWidget, pane_header_widget::PaneHeaderWidget};
 
@@ -595,7 +595,8 @@ impl Widget<AppState> for PaneDockWidget {
             let pane_size = pane_widget.layout(ctx, &pane_bc, pane_data, env);
             // align to bottom
             pane_widget.set_origin(ctx, Point::new(
-                bc.max().width - pane_location_data.actual_x_pos - pane_location_data.width,
+                // Shift X by 1 for border
+                bc.max().width - pane_location_data.actual_x_pos - pane_location_data.width + 1.0,
                 bc.max().height - pane_size.height
             ));
             // Position header
@@ -604,7 +605,8 @@ impl Widget<AppState> for PaneDockWidget {
             let header_size = header_widget.layout(ctx, &header_bc, pane_data, env);
             // align to top of content
             header_widget.set_origin(ctx, Point::new(
-                bc.max().width - pane_location_data.actual_x_pos - pane_location_data.width,
+                // Shift x by one for border
+                bc.max().width - pane_location_data.actual_x_pos - pane_location_data.width + 1.0,
                 bc.max().height - pane_size.height - header_size.height
             ));
         };
@@ -640,6 +642,15 @@ impl Widget<AppState> for PaneDockWidget {
             pane_widget.paint(ctx, pane_data, env);
             // Draw header
             pane_header_widget.paint(ctx, pane_data, env);
+
+            // Draw border
+            let left = pane_widget.layout_rect().x0.min(pane_header_widget.layout_rect().x0);
+            let right = pane_widget.layout_rect().x1.min(pane_header_widget.layout_rect().x1);
+            let top = pane_header_widget.layout_rect().y0;
+            let bottom = pane_widget.layout_rect().y1;
+            let border_color = Color::rgba8(0, 0, 0, 100);
+            ctx.fill(Rect::new(left - 1.0, top, left, bottom), &border_color);
+            ctx.fill(Rect::new(right, top, right + 1.0, bottom), &border_color);
         };
     }
 }
